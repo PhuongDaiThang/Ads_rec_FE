@@ -97,6 +97,59 @@ export async function apiRecommend(data) {
   return handleResponse(r);
 }
 
+// ============= PROFILE APIs =============
+
+export async function apiGetProfile() {
+  const r = await fetch(`${BASE}/profile/me`, {
+    headers: headers(true),
+  });
+  return handleResponse(r);
+}
+
+export async function apiCreateOrUpdateProfile(data) {
+  const r = await fetch(`${BASE}/profile/me`, {
+    method: "POST",
+    headers: {
+      ...headers(true),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(r);
+}
+
+export async function apiPatchProfile(data) {
+  const r = await fetch(`${BASE}/profile/me`, {
+    method: "PATCH",
+    headers: {
+      ...headers(true),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(r);
+}
+
+export async function apiDeleteProfile() {
+  const r = await fetch(`${BASE}/profile/me`, {
+    method: "DELETE",
+    headers: headers(true),
+  });
+  return handleResponse(r);
+}
+
+export async function apiRecommendByProfile(limit = 5) {
+  const r = await fetch(`${BASE}/recommend/profile`, {
+    method: "POST",
+    headers: {
+      ...headers(true),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ limit }),
+  });
+  return handleResponse(r);
+}
+
 // ============= ADMIN APIs =============
 
 export async function apiListAds() {

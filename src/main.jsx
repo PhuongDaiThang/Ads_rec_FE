@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Recommend from "./pages/Recommend.jsx";
+import Profile from "./pages/Profile.jsx";
 import Health from "./pages/Health.jsx";
 import AdminAds from "./pages/AdminAds.jsx";
 import AdminAdEdit from "./pages/AdminAdEdit.jsx";
@@ -28,6 +29,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 element={
                   <ProtectedRoute>
                     <Recommend />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
