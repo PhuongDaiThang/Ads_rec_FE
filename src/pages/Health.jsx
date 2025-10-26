@@ -45,7 +45,6 @@ export default function Health() {
           {loading ? "Đang kiểm tra..." : "Làm mới"}
         </button>
       </div>
-
       {err && (
         <div
           style={{
@@ -237,9 +236,9 @@ export default function Health() {
           >
             <strong>Thông tin:</strong>
             <ul style={{ margin: "8px 0 0 0", paddingLeft: 20 }}>
-              <li>Endpoint này yêu cầu authentication</li>
+              <li>Endpoint này là PUBLIC (không yêu cầu authentication)</li>
               <li>
-                Số lượng labels hiện có trong hệ thống:{" "}
+                Số lượng nhãn hiện có trong hệ thống:{" "}
                 <strong>{data.labels_count}</strong>
               </li>
               <li>Backend đã sẵn sàng xử lý requests</li>

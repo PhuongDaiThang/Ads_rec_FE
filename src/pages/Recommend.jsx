@@ -205,9 +205,9 @@ export default function Recommend() {
                   color: "var(--muted)",
                 }}
               >
-                <strong>Gợi ý theo nội dung:</strong> Phân tích văn bản bạn
-                nhập để tìm quảng cáo phù hợp. Phù hợp cho việc tìm kiếm quảng
-                cáo theo từ khóa cụ thể.
+                <strong>Gợi ý theo nội dung:</strong> Phân tích văn bản bạn nhập
+                để tìm quảng cáo phù hợp. Phù hợp cho việc tìm kiếm quảng cáo
+                theo từ khóa cụ thể.
               </p>
             </div>
 
@@ -292,8 +292,8 @@ export default function Recommend() {
                   color: "var(--muted)",
                 }}
               >
-                <strong>Gợi ý theo profile:</strong> Sử dụng thông tin cá
-                nhân đã lưu của bạn để tìm quảng cáo phù hợp. AI sẽ phân tích độ
+                <strong>Gợi ý theo profile:</strong> Sử dụng thông tin cá nhân
+                đã lưu của bạn để tìm quảng cáo phù hợp. AI sẽ phân tích độ
                 tuổi, giới tính, sở thích và thói quen của bạn.
               </p>
             </div>

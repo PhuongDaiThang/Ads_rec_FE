@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import {
   apiGetProfile,
   apiCreateOrUpdateProfile,
+  apiPatchProfile,
   apiDeleteProfile,
+  apiGetTopics,
 } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +14,7 @@ export default function Profile() {
   const nav = useNavigate();
 
   const [profile, setProfile] = useState({
+    topic_id: "",
     age: "",
     gender: "",
     location: "",
@@ -20,6 +23,9 @@ export default function Profile() {
     income_level: "",
     education: "",
     marital_status: "",
+    recently_posted: [],
+    like_comment_posted: [],
+    friends_data: [],
   });
 
   const [existingProfile, setExistingProfile] = useState(null);
@@ -27,6 +33,12 @@ export default function Profile() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [interestInput, setInterestInput] = useState("");
+  const [topics, setTopics] = useState([]);
+
+  // Text input states for complex fields
+  const [recentlyPostedText, setRecentlyPostedText] = useState("");
+  const [likeCommentText, setLikeCommentText] = useState("");
+  const [friendsDataText, setFriendsDataText] = useState("");
 
   // Predefined interests
   const predefinedInterests = [
@@ -48,10 +60,23 @@ export default function Profile() {
   ];
 
   useEffect(() => {
+    // Load topics list (public endpoint)
+    loadTopics();
+
     if (isAuthed) {
       loadProfile();
     }
   }, [isAuthed]);
+
+  const loadTopics = async () => {
+    try {
+      const topicsData = await apiGetTopics();
+      setTopics(topicsData || []);
+    } catch (e) {
+      console.error("Failed to load topics:", e);
+      // Don't show error to user, topics are optional
+    }
+  };
 
   const loadProfile = async () => {
     try {
@@ -59,6 +84,7 @@ export default function Profile() {
       const data = await apiGetProfile();
       setExistingProfile(data);
       setProfile({
+        topic_id: data.topic_id || "",
         age: data.age || "",
         gender: data.gender || "",
         location: data.location || "",
@@ -67,7 +93,15 @@ export default function Profile() {
         income_level: data.income_level || "",
         education: data.education || "",
         marital_status: data.marital_status || "",
+        recently_posted: [],
+        like_comment_posted: [],
+        friends_data: [],
       });
+
+      // Set text strings for display (API returns strings, not arrays)
+      setRecentlyPostedText(data.recently_posted || "");
+      setLikeCommentText(data.like_comment_posted || "");
+      setFriendsDataText(data.friends_data || "");
     } catch (e) {
       // 404 means profile doesn't exist yet, which is fine
       if (e.message.includes("404") || e.message.includes("not found")) {
@@ -90,6 +124,19 @@ export default function Profile() {
       Object.keys(profile).forEach((key) => {
         if (key === "interests") {
           cleanedData[key] = profile[key];
+        } else if (key === "recently_posted") {
+          // Store as text string (API expects string, not array)
+          if (recentlyPostedText.trim()) {
+            cleanedData[key] = recentlyPostedText.trim();
+          }
+        } else if (key === "like_comment_posted") {
+          if (likeCommentText.trim()) {
+            cleanedData[key] = likeCommentText.trim();
+          }
+        } else if (key === "friends_data") {
+          if (friendsDataText.trim()) {
+            cleanedData[key] = friendsDataText.trim();
+          }
         } else if (profile[key] !== "") {
           cleanedData[key] = profile[key];
         }
@@ -100,7 +147,13 @@ export default function Profile() {
         cleanedData.age = Number(cleanedData.age);
       }
 
-      const data = await apiCreateOrUpdateProfile(cleanedData);
+      if (cleanedData.topic_id) {
+        cleanedData.topic_id = Number(cleanedData.topic_id);
+      }
+
+      const data = existingProfile
+        ? await apiPatchProfile(cleanedData)
+        : await apiCreateOrUpdateProfile(cleanedData);
       setExistingProfile(data);
       setSuccess(
         existingProfile
@@ -127,6 +180,7 @@ export default function Profile() {
       await apiDeleteProfile();
       setExistingProfile(null);
       setProfile({
+        topic_id: "",
         age: "",
         gender: "",
         location: "",
@@ -135,7 +189,13 @@ export default function Profile() {
         income_level: "",
         education: "",
         marital_status: "",
+        recently_posted: [],
+        like_comment_posted: [],
+        friends_data: [],
       });
+      setRecentlyPostedText("");
+      setLikeCommentText("");
+      setFriendsDataText("");
       setSuccess("Đã xóa profile thành công!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (e) {
@@ -175,6 +235,7 @@ export default function Profile() {
   // Calculate profile completion percentage
   const getCompletionPercentage = () => {
     const fields = [
+      profile.topic_id,
       profile.age,
       profile.gender,
       profile.location,
@@ -183,6 +244,9 @@ export default function Profile() {
       profile.income_level,
       profile.education,
       profile.marital_status,
+      recentlyPostedText.trim().length > 0,
+      likeCommentText.trim().length > 0,
+      friendsDataText.trim().length > 0,
     ];
     const filledFields = fields.filter((f) => f).length;
     return Math.round((filledFields / fields.length) * 100);
@@ -272,6 +336,27 @@ export default function Profile() {
           <h3 style={{ marginBottom: 16 }}>Thông tin cơ bản</h3>
 
           <div className="grid" style={{ gap: 16 }}>
+            <div className="field">
+              <label>Chủ đề quan tâm</label>
+              <select
+                value={profile.topic_id}
+                onChange={(e) =>
+                  setProfile({ ...profile, topic_id: e.target.value })
+                }
+                disabled={loading}
+              >
+                <option value="">-- Chọn chủ đề --</option>
+                {topics.map((topic) => (
+                  <option key={topic.id} value={topic.id}>
+                    {topic.name}
+                  </option>
+                ))}
+              </select>
+              <small style={{ color: "var(--muted)" }}>
+                Chọn chủ đề phù hợp với sở thích của bạn
+              </small>
+            </div>
+
             <div className="field">
               <label>Tuổi</label>
               <input
@@ -507,6 +592,87 @@ export default function Profile() {
               </div>
             </div>
           )}
+        </div>
+
+        <div className="card">
+          <h3 style={{ marginBottom: 16 }}>
+            Dữ liệu hoạt động (Optional - Dành cho AI phân tích)
+          </h3>
+          <p
+            style={{
+              color: "var(--muted)",
+              fontSize: 14,
+              marginBottom: 16,
+              lineHeight: 1.5,
+            }}
+          >
+            Mô tả các hoạt động của bạn trên mạng xã hội để AI có thể phân tích
+            hành vi của bạn tốt hơn. Bạn có thể bỏ qua hoặc nhập mô tả tự do.
+          </p>
+
+          <div className="field">
+            <label>Bài đăng gần đây</label>
+            <textarea
+              rows={6}
+              value={recentlyPostedText}
+              onChange={(e) => setRecentlyPostedText(e.target.value)}
+              placeholder="Ví dụ: Tôi thường đăng bài về công nghệ, đặc biệt là AI và machine learning. Gần đây tôi có viết về xu hướng smartphone mới..."
+              disabled={loading}
+              style={{ fontSize: 14 }}
+            />
+            <small style={{ display: "block", marginTop: 4 }}>
+              {recentlyPostedText.length} ký tự - Mô tả nội dung bài đăng gần
+              đây của bạn
+            </small>
+          </div>
+
+          <div className="field">
+            <label>Bài viết đã like/comment</label>
+            <textarea
+              rows={6}
+              value={likeCommentText}
+              onChange={(e) => setLikeCommentText(e.target.value)}
+              placeholder="Ví dụ: Tôi hay like các bài viết về du lịch, ẩm thực và review sản phẩm công nghệ. Tôi thường comment vào các bài về nhiếp ảnh..."
+              disabled={loading}
+              style={{ fontSize: 14 }}
+            />
+            <small style={{ display: "block", marginTop: 4 }}>
+              {likeCommentText.length} ký tự - Mô tả các bài viết bạn thường
+              tương tác
+            </small>
+          </div>
+
+          <div className="field">
+            <label>Thông tin bạn bè</label>
+            <textarea
+              rows={6}
+              value={friendsDataText}
+              onChange={(e) => setFriendsDataText(e.target.value)}
+              placeholder="Ví dụ: Bạn bè của tôi chủ yếu quan tâm đến thể thao, game và công nghệ. Nhiều người trong số họ làm trong ngành IT..."
+              disabled={loading}
+              style={{ fontSize: 14 }}
+            />
+            <small style={{ display: "block", marginTop: 4 }}>
+              {friendsDataText.length} ký tự - Mô tả về sở thích và đặc điểm của
+              bạn bè
+            </small>
+          </div>
+
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              background: "var(--info-bg)",
+              border: "1px solid var(--info-border)",
+              marginTop: 16,
+            }}
+          >
+            <small>
+              <strong>💡 Tip:</strong> Các trường này là tùy chọn. Bạn có thể bỏ
+              qua hoặc nhập mô tả tự do về hoạt động của bạn. AI sẽ phân tích
+              profile dựa trên dữ liệu bạn cung cấp.
+            </small>
+          </div>
         </div>
 
         <div className="card">

@@ -7,7 +7,10 @@ const BASE = (import.meta.env.VITE_API_BASE ?? "http://localhost:8000").replace(
 function getAuthToken() {
   const token = localStorage.getItem("access_token");
   const tokenType = localStorage.getItem("token_type") || "bearer";
-  return token ? `${tokenType} ${token}` : null;
+  // Capitalize first letter to match HTTP standard (Bearer, not bearer)
+  const capitalizedType =
+    tokenType.charAt(0).toUpperCase() + tokenType.slice(1);
+  return token ? `${capitalizedType} ${token}` : null;
 }
 
 // Helper to build headers
@@ -49,10 +52,9 @@ async function handleResponse(response) {
   return response.json();
 }
 
-// Health check - requires authentication
 export async function apiHealth() {
   const r = await fetch(`${BASE}/health`, {
-    headers: headers(true),
+    headers: headers(false), // Health endpoint is PUBLIC, no auth required
   });
   return handleResponse(r);
 }
@@ -84,6 +86,13 @@ export async function apiLogin(data) {
 }
 
 // ============= PUBLIC APIs =============
+
+export async function apiGetTopics() {
+  const r = await fetch(`${BASE}/topics`, {
+    headers: headers(false), // Public endpoint, no auth required
+  });
+  return handleResponse(r);
+}
 
 export async function apiRecommend(data) {
   const r = await fetch(`${BASE}/recommend`, {
@@ -159,6 +168,18 @@ export async function apiListAds() {
   return handleResponse(r);
 }
 
+export async function apiCreateAd(data) {
+  const r = await fetch(`${BASE}/admin/ads`, {
+    method: "POST",
+    headers: {
+      ...headers(true),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(r);
+}
+
 export async function apiGetAd(id) {
   const r = await fetch(`${BASE}/admin/ads/${id}`, {
     headers: headers(true),
@@ -166,14 +187,14 @@ export async function apiGetAd(id) {
   return handleResponse(r);
 }
 
-export async function apiUpdateAd(id, payload) {
+export async function apiUpdateAd(id, data) {
   const r = await fetch(`${BASE}/admin/ads/${id}`, {
     method: "PUT",
     headers: {
       ...headers(true),
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(data),
   });
   return handleResponse(r);
 }
@@ -182,18 +203,6 @@ export async function apiDeleteAd(id) {
   const r = await fetch(`${BASE}/admin/ads/${id}`, {
     method: "DELETE",
     headers: headers(true),
-  });
-  return handleResponse(r);
-}
-
-export async function apiUploadAds(file) {
-  const fd = new FormData();
-  fd.append("file", file);
-  const r = await fetch(`${BASE}/admin/ads/upload`, {
-    method: "POST",
-    headers: headers(true),
-    // Don't set Content-Type - browser will set it with boundary for multipart/form-data
-    body: fd,
   });
   return handleResponse(r);
 }

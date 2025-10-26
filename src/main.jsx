@@ -13,7 +13,7 @@ import Profile from "./pages/Profile.jsx";
 import Health from "./pages/Health.jsx";
 import AdminAds from "./pages/AdminAds.jsx";
 import AdminAdEdit from "./pages/AdminAdEdit.jsx";
-import UploadAds from "./pages/UploadAds.jsx";
+import CreateAd from "./pages/CreateAd.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -40,14 +40,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="health"
-                element={
-                  <ProtectedRoute>
-                    <Health />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="health" element={<Health />} />
               <Route
                 path="admin/ads"
                 element={
@@ -57,10 +50,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 }
               />
               <Route
-                path="admin/ads/upload"
+                path="admin/ads/create"
                 element={
                   <ProtectedRoute requireAdmin>
-                    <UploadAds />
+                    <CreateAd />
                   </ProtectedRoute>
                 }
               />

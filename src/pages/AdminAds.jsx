@@ -11,8 +11,8 @@ export default function AdminAds() {
   async function load() {
     setErr(null);
     try {
-      const data = await apiListAds();
-      setAds(data);
+      const adsData = await apiListAds();
+      setAds(adsData);
     } catch (e) {
       setErr(e.message);
     }
@@ -23,11 +23,7 @@ export default function AdminAds() {
   }, []);
 
   async function del(ad) {
-    if (
-      !window.confirm(
-        `Bạn có chắc muốn xóa quảng cáo "${ad.title}"?\n\nID: ${ad.id}\nExternal ID: ${ad.external_id}`
-      )
-    ) {
+    if (!window.confirm(`Bạn có chắc muốn xóa quảng cáo "${ad.title}"?`)) {
       return;
     }
 
@@ -47,7 +43,6 @@ export default function AdminAds() {
     const search = searchTerm.toLowerCase();
     return (
       ad.title?.toLowerCase().includes(search) ||
-      ad.external_id?.toLowerCase().includes(search) ||
       ad.description?.toLowerCase().includes(search) ||
       ad.target_audience?.toLowerCase().includes(search)
     );
@@ -71,9 +66,11 @@ export default function AdminAds() {
             Quản lý danh sách quảng cáo trong hệ thống
           </p>
         </div>
-        <Link className="btn" to="/admin/ads/upload">
-          Upload CSV
-        </Link>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link className="btn" to="/admin/ads/create">
+            Tạo quảng cáo
+          </Link>
+        </div>
       </div>
 
       {err && (
@@ -102,10 +99,10 @@ export default function AdminAds() {
           <p style={{ color: "var(--muted)" }}>Chưa có quảng cáo nào</p>
           <Link
             className="btn"
-            to="/admin/ads/upload"
+            to="/admin/ads/create"
             style={{ marginTop: 16 }}
           >
-            Upload quảng cáo đầu tiên
+            Tạo quảng cáo đầu tiên
           </Link>
         </div>
       ) : (
@@ -133,7 +130,7 @@ export default function AdminAds() {
                   <th>Tiêu đề</th>
                   <th>Mô tả</th>
                   <th>Đối tượng</th>
-                  <th style={{ width: 180, textAlign: "right" }}>Thao tác</th>
+                  <th style={{ width: 100, textAlign: "right" }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,10 +148,10 @@ export default function AdminAds() {
                     </td>
                   </tr>
                 ) : (
-                  filteredAds?.map((a) => (
+                  filteredAds?.map((a, index) => (
                     <tr key={a.id}>
                       <td style={{ fontWeight: 600, color: "var(--accent)" }}>
-                        {a.stt}
+                        {index + 1}
                       </td>
                       <td style={{ fontWeight: 600 }}>{a.title}</td>
                       <td>
@@ -179,8 +176,9 @@ export default function AdminAds() {
                           style={{ justifyContent: "flex-end", gap: 8 }}
                         >
                           <Link
-                            className="btn secondary"
                             to={`/admin/ads/${a.id}`}
+                            className="btn secondary"
+                            style={{ fontSize: 13, padding: "6px 12px" }}
                           >
                             Sửa
                           </Link>
@@ -188,6 +186,7 @@ export default function AdminAds() {
                             className="btn danger"
                             disabled={busy === a.id}
                             onClick={() => del(a)}
+                            style={{ fontSize: 13, padding: "6px 12px" }}
                           >
                             {busy === a.id ? "Đang xóa..." : "Xóa"}
                           </button>

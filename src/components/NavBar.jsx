@@ -18,11 +18,11 @@ export default function NavBar() {
         <Link to="/">AdRec</Link>
       </div>
       <nav className="flex">
+        <Link to="/health">Health</Link>
         {isAuthed && (
           <>
             <Link to="/">Gợi ý</Link>
             <Link to="/profile">Profile</Link>
-            <Link to="/health">Health</Link>
             {isAdmin && <Link to="/admin/ads">Quản trị</Link>}
           </>
         )}

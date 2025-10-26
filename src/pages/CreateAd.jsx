@@ -1,24 +1,18 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { apiGetAd, apiUpdateAd } from "../api/client";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { apiCreateAd } from "../api/client";
 
-export default function AdminAdEdit() {
-  const { id } = useParams();
-  const [ad, setAd] = useState(null);
+export default function CreateAd() {
+  const [ad, setAd] = useState({
+    title: "",
+    description: "",
+    target_audience: "",
+    topic: "",
+  });
   const [err, setErr] = useState(null);
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
-
-  useEffect(() => {
-    setLoading(true);
-    apiGetAd(id)
-      .then((adData) => {
-        setAd(adData);
-      })
-      .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false));
-  }, [id]);
 
   async function save(e) {
     e.preventDefault();
@@ -50,8 +44,8 @@ export default function AdminAdEdit() {
     }
 
     try {
-      await apiUpdateAd(id, payload);
-      setMsg("Đã lưu thành công! Đang chuyển về danh sách...");
+      await apiCreateAd(payload);
+      setMsg("Tạo quảng cáo thành công! Đang chuyển về danh sách...");
       setTimeout(() => nav("/admin/ads"), 1200);
     } catch (e) {
       setErr(e.message);
@@ -59,34 +53,6 @@ export default function AdminAdEdit() {
       setLoading(false);
     }
   }
-
-  if (loading && !ad) {
-    return (
-      <div
-        className="card"
-        style={{ marginTop: 40, textAlign: "center", padding: 60 }}
-      >
-        <p style={{ color: "var(--muted)" }}>Đang tải thông tin quảng cáo...</p>
-      </div>
-    );
-  }
-
-  if (err && !ad) {
-    return (
-      <div
-        className="card"
-        style={{ marginTop: 40, textAlign: "center", padding: 60 }}
-      >
-        <h3 style={{ color: "var(--danger-text)" }}>Lỗi</h3>
-        <p style={{ color: "var(--muted)" }}>{err}</p>
-        <Link className="btn" to="/admin/ads" style={{ marginTop: 20 }}>
-          Quay lại danh sách
-        </Link>
-      </div>
-    );
-  }
-
-  if (!ad) return null;
 
   return (
     <div className="card" style={{ maxWidth: 800, margin: "40px auto" }}>
@@ -99,11 +65,11 @@ export default function AdminAdEdit() {
         }}
       >
         <div style={{ textAlign: "center", flex: 1 }}>
-          <h2 style={{ margin: 0 }}>Chỉnh sửa quảng cáo</h2>
+          <h2 style={{ margin: 0 }}>Tạo quảng cáo mới</h2>
           <p
             style={{ color: "var(--muted)", fontSize: 14, margin: "4px 0 0 0" }}
           >
-            Cập nhật thông tin quảng cáo
+            Thêm quảng cáo mới vào hệ thống
           </p>
         </div>
         <Link className="btn secondary" to="/admin/ads">
@@ -206,7 +172,7 @@ export default function AdminAdEdit() {
               alignItems: "center",
             }}
           >
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+            {loading ? "Đang tạo..." : "Tạo quảng cáo"}
           </button>
           <Link className="btn secondary" to="/admin/ads" style={{ flex: 0 }}>
             Hủy

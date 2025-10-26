@@ -24,6 +24,8 @@ Giao diện frontend hiện đại cho **Advertising Recommendation System** đ�
 
 ### 🎯 Main Feature - Gợi ý quảng cáo
 
+**Gợi ý theo nội dung:**
+
 - Nhập mô tả sở thích/nhu cầu (textarea với character counter)
 - Chọn số lượng quảng cáo (1-50) bằng slider
 - Hiển thị kết quả phân tích AI:
@@ -33,6 +35,23 @@ Giao diện frontend hiện đại cho **Advertising Recommendation System** đ�
   - Danh sách quảng cáo phù hợp
   - Các label có sẵn trong hệ thống
 - Empty states và error handling
+
+**Gợi ý theo profile:**
+
+- Sử dụng thông tin profile đã lưu của user
+- AI phân tích dựa trên: tuổi, giới tính, sở thích, nghề nghiệp, thu nhập, hoạt động
+- Tự động đề xuất quảng cáo phù hợp với profile
+
+### 👤 User Profile Management
+
+- Tạo và cập nhật profile cá nhân
+- Chọn topic/chủ đề quan tâm từ dropdown
+- Thông tin cơ bản: tuổi, giới tính, địa điểm, tình trạng hôn nhân
+- Công việc & học vấn: nghề nghiệp, mức thu nhập, trình độ
+- Sở thích: chọn từ danh sách có sẵn hoặc thêm tùy chỉnh
+- Dữ liệu hoạt động (optional): bài đăng, like/comment, bạn bè (JSON format)
+- Progress bar hiển thị % hoàn thành profile
+- Validation và error handling
 
 ### 🏥 Health Check
 
@@ -44,22 +63,12 @@ Giao diện frontend hiện đại cho **Advertising Recommendation System** đ�
 ### 🛡️ Admin Panel (Chỉ dành cho admin role)
 
 - **Danh sách quảng cáo**
-  - Xem tất cả quảng cáo
-  - Search/filter theo tiêu đề, mã, mô tả
+  - Xem và tìm kiếm quảng cáo theo tiêu đề, mô tả, đối tượng
   - Xóa quảng cáo (với confirmation dialog)
-  - Pagination info
-- **Chỉnh sửa quảng cáo**
-
-  - Form đầy đủ với validation
-  - Edit title, description, target audience, labels
-  - Character counter
-  - Visual label tags
-
-- **Upload CSV/Excel**
-  - Drag & drop file upload
-  - File validation (type, size < 10MB)
-  - Hỗ trợ .csv, .xls, .xlsx
-  - Hiển thị kết quả upload (labels created, ads created/updated)
+- **Tạo & chỉnh sửa quảng cáo**
+  - Form với validation
+  - Chỉnh sửa tiêu đề, mô tả, đối tượng mục tiêu
+  - Character counter cho mô tả
 
 ## 🚀 Cài đặt và chạy
 
@@ -111,15 +120,17 @@ src/
 │   ├── NavBar.jsx         # Navigation bar với role-based menu
 │   └── ProtectedRoute.jsx # Route protection (user/admin)
 ├── hooks/
-│   └── useAuth.js         # Auth context và JWT management
+│   ├── useAuth.js         # Auth context và JWT management
+│   └── useTheme.js        # Theme context (dark/light mode)
 ├── pages/
 │   ├── Login.jsx          # Trang đăng nhập
 │   ├── Register.jsx       # Trang đăng ký
 │   ├── Recommend.jsx      # Trang gợi ý quảng cáo (main feature)
+│   ├── Profile.jsx        # Quản lý profile user
 │   ├── Health.jsx         # Health check
-│   ├── AdminAds.jsx       # Danh sách quảng cáo
-│   ├── AdminAdEdit.jsx    # Sửa quảng cáo
-│   └── UploadAds.jsx      # Upload CSV
+│   ├── AdminAds.jsx       # Danh sách quảng cáo (admin)
+│   ├── AdminAdEdit.jsx    # Sửa quảng cáo (admin)
+│   └── CreateAd.jsx       # Tạo quảng cáo (admin)
 ├── styles/
 │   └── app.css            # Global styles
 ├── App.jsx                # App component
@@ -170,24 +181,41 @@ src/
 - **Buttons**: 3 variants (primary, secondary, danger)
 - **Forms**: Focus states, validation, disabled states
 - **Tables**: Hover effects, proper spacing
-- **Tags**: Pill-shaped badges cho labels
+- **Tags**: Pill-shaped badges cho thông tin nổi bật
 
 ## 📝 API Endpoints được sử dụng
 
-### Public
+### Authentication
 
 - `POST /register` - Đăng ký tài khoản
-- `POST /login` - Đăng nhập
-- `GET /health` - Health check (requires auth)
-- `POST /recommend` - Gợi ý quảng cáo (requires auth)
+- `POST /login` - Đăng nhập và nhận token
+
+> Lưu ý: Các endpoint dưới đây yêu cầu header `Authorization: Bearer <token>`.
+
+### Profile
+
+- `GET /profile/me` - Lấy profile hiện tại
+- `POST /profile/me` - Tạo hoặc cập nhật toàn bộ profile
+- `PATCH /profile/me` - Cập nhật một phần profile
+- `DELETE /profile/me` - Xóa profile
+
+### Recommendation
+
+- `GET /health` - Health check (PUBLIC, không yêu cầu auth)
+- `POST /recommend` - Gợi ý quảng cáo theo nội dung
+- `POST /recommend/profile` - Gợi ý quảng cáo theo profile
+
+### Topics
+
+- `GET /topics` - Lấy danh sách topics (PUBLIC, không yêu cầu auth)
 
 ### Admin
 
 - `GET /admin/ads` - Danh sách quảng cáo
+- `POST /admin/ads` - Tạo quảng cáo
 - `GET /admin/ads/:id` - Chi tiết quảng cáo
 - `PUT /admin/ads/:id` - Cập nhật quảng cáo
 - `DELETE /admin/ads/:id` - Xóa quảng cáo
-- `POST /admin/ads/upload` - Upload CSV/Excel
 
 ## 🔒 Security
 
